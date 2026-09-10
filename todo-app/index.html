@@ -3,15 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bloom — a small, calm to-do list for one thing at a time.">
+<meta name="theme-color" content="#D6487A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
 <title>Bloom — a small list for today</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <main class="card">
-    <header class="card__header">
-      <p class="eyebrow">today's list</p>
-      <h1>Bloom</h1>
+  <main class="card" style="position: relative; overflow: hidden;">
+
+    <!-- decorative petals, purely inline so style.css stays untouched -->
+    <svg aria-hidden="true" width="120" height="120" viewBox="0 0 120 120"
+         style="position:absolute; top:-30px; right:-30px; opacity:0.5; pointer-events:none;">
+      <circle cx="60" cy="60" r="50" fill="var(--petal-light)"/>
+    </svg>
+    <svg aria-hidden="true" width="70" height="70" viewBox="0 0 70 70"
+         style="position:absolute; bottom:-20px; left:-20px; opacity:0.5; pointer-events:none;">
+      <circle cx="35" cy="35" r="30" fill="var(--petal-light)"/>
+    </svg>
+
+    <header class="card__header" style="position: relative;">
+      <p class="eyebrow" style="display:flex; align-items:center; gap:6px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2C12 2 8 6 8 10a4 4 0 0 0 8 0c0-4-4-8-4-8Z" fill="var(--rose)"/>
+        </svg>
+        today's list
+      </p>
+      <h1>
+        Bloom
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+             style="vertical-align: middle; margin-left: 4px;">
+          <path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 3.5 0 6 3.5 4 7.5C19 16.65 12 21 12 21Z"
+                fill="var(--rose)" opacity="0.85"/>
+        </svg>
+      </h1>
       <p class="tagline">Small things, tended one at a time.</p>
     </header>
 
@@ -19,7 +45,7 @@
       <input
         type="text"
         id="task-input"
-        placeholder="What needs doing?"
+        placeholder="What needs doing today?"
         maxlength="120"
         aria-label="Add a task"
       >
@@ -33,7 +59,7 @@
     <ul id="task-list" class="task-list"></ul>
 
     <p id="empty-state" class="empty-state">
-      Nothing here yet — the day is still a blank stem.
+      Nothing here yet — the day is still a blank stem. 🌱
     </p>
 
     <footer class="card__footer">
@@ -47,7 +73,13 @@
     </footer>
   </main>
 
-  <p class="credit">made with a little pink</p>
+  <p class="credit" style="display:flex; align-items:center; gap:5px;">
+    made with a little
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--rose)" aria-hidden="true">
+      <path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 3.5 0 6 3.5 4 7.5C19 16.65 12 21 12 21Z"/>
+    </svg>
+    pink
+  </p>
 
   <script src="script.js"></script>
 </body>
