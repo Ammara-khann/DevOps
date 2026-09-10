@@ -4,16 +4,345 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Bloom — a small, calm to-do list for one thing at a time.">
-<meta name="theme-color" content="#D6487A">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#2F8FD1">
 <title>Bloom — a small list for today</title>
-<link rel="stylesheet" href="style.css">
+<style>
+/* ---------------------------------------------
+   Bloom — a small sky-blue to-do list
+   Tokens
+---------------------------------------------- */
+:root {
+  --blush:        #EAF4FB;   /* page background */
+  --card:         #F8FBFE;   /* card surface */
+  --rose:         #2F8FD1;   /* primary accent */
+  --rose-deep:    #1F6FA8;   /* pressed / strong accent */
+  --petal:        #C6E1F2;   /* soft accent / borders */
+  --petal-light:  #E4F1FA;   /* hover fills */
+  --plum:         #1F2E38;   /* main text */
+  --plum-soft:    #62808F;   /* muted text */
+  --line:         #CFE4F2;   /* hairline dividers */
+
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 18px;
+  background:
+    radial-gradient(ellipse 700px 400px at 15% -5%, var(--petal-light), transparent),
+    radial-gradient(ellipse 600px 400px at 105% 105%, var(--petal-light), transparent),
+    var(--blush);
+  font-family: var(--font-body);
+  color: var(--plum);
+}
+
+/* ---------------------------------------------
+   Card
+---------------------------------------------- */
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 30px 28px 22px;
+  box-shadow: 0 24px 48px -28px rgba(31, 111, 168, 0.35);
+}
+
+.card__header {
+  text-align: left;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  color: var(--rose);
+  font-weight: 600;
+}
+
+.card__header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 40px;
+  color: var(--plum);
+  line-height: 1;
+}
+
+.tagline {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--plum-soft);
+}
+
+/* ---------------------------------------------
+   Add form
+---------------------------------------------- */
+.add-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+#task-input {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--plum);
+  font-family: var(--font-body);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#task-input::placeholder {
+  color: #8FB8D1;
+}
+
+#task-input:focus {
+  outline: none;
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(47, 143, 209, 0.15);
+}
+
+.add-form button {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  background: var(--rose);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.add-form button:hover { background: var(--rose-deep); }
+.add-form button:active { transform: scale(0.94); }
+
+/* ---------------------------------------------
+   Task list
+---------------------------------------------- */
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px dashed var(--line);
+  animation: bloom-in 0.18s ease;
+}
+
+.task:last-child { border-bottom: none; }
+
+@keyframes bloom-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.task__check {
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rose);
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.task__check svg {
+  width: 11px;
+  height: 11px;
+  opacity: 0;
+  stroke: #fff;
+  transition: opacity 0.12s ease;
+}
+
+.task.is-done .task__check {
+  background: var(--rose);
+}
+
+.task.is-done .task__check svg {
+  opacity: 1;
+}
+
+.task__label {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--plum);
+  word-break: break-word;
+  cursor: default;
+}
+
+.task.is-done .task__label {
+  color: var(--plum-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--petal);
+  text-decoration-thickness: 1.5px;
+}
+
+.task__delete {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: none;
+  color: var(--plum-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.task:hover .task__delete { opacity: 1; }
+
+.task__delete:hover {
+  color: var(--rose-deep);
+  background: var(--petal-light);
+}
+
+.task__delete svg { width: 14px; height: 14px; }
+
+/* ---------------------------------------------
+   Empty state
+---------------------------------------------- */
+.empty-state {
+  display: none;
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  font-family: var(--font-display);
+  color: var(--plum-soft);
+  padding: 22px 6px 18px;
+}
+
+.empty-state.is-visible { display: block; }
+
+/* ---------------------------------------------
+   Footer
+---------------------------------------------- */
+.card__footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.count {
+  font-size: 13px;
+  color: var(--plum-soft);
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+  background: var(--petal-light);
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.filter-btn {
+  border: none;
+  background: none;
+  font-size: 12.5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  color: var(--plum-soft);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.filter-btn:hover { color: var(--rose-deep); }
+
+.filter-btn.is-active {
+  background: #fff;
+  color: var(--rose-deep);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(31, 111, 168, 0.18);
+}
+
+.text-btn {
+  border: none;
+  background: none;
+  font-size: 12.5px;
+  color: var(--plum-soft);
+  cursor: pointer;
+  font-family: var(--font-body);
+  padding: 4px 2px;
+  text-decoration: underline;
+  text-decoration-color: var(--petal);
+  text-underline-offset: 2px;
+}
+
+.text-btn:hover { color: var(--rose-deep); }
+
+.credit {
+  font-size: 12px;
+  color: var(--plum-soft);
+  opacity: 0.7;
+}
+
+/* ---------------------------------------------
+   Accessibility
+---------------------------------------------- */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task { animation: none; }
+}
+
+/* ---------------------------------------------
+   Small screens
+---------------------------------------------- */
+@media (max-width: 420px) {
+  .card { padding: 24px 18px 18px; }
+  .card__header h1 { font-size: 34px; }
+}
+</style>
 </head>
 <body>
 
   <main class="card" style="position: relative; overflow: hidden;">
 
-    <!-- decorative petals, purely inline so style.css stays untouched -->
     <svg aria-hidden="true" width="120" height="120" viewBox="0 0 120 120"
          style="position:absolute; top:-30px; right:-30px; opacity:0.5; pointer-events:none;">
       <circle cx="60" cy="60" r="50" fill="var(--petal-light)"/>
@@ -78,9 +407,135 @@
     <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--rose)" aria-hidden="true">
       <path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 3.5 0 6 3.5 4 7.5C19 16.65 12 21 12 21Z"/>
     </svg>
-    pink
+    blue
   </p>
 
-  <script src="script.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // NOTE: localStorage isn't available in this environment, so tasks
+    // are kept in memory for the session instead.
+    let tasks = [];
+
+    const form = document.getElementById('add-form');
+    const input = document.getElementById('task-input');
+    const list = document.getElementById('task-list');
+    const emptyState = document.getElementById('empty-state');
+    const countEl = document.getElementById('count');
+    const clearBtn = document.getElementById('clear-completed');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    let currentFilter = 'all';
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function addTask(text) {
+      tasks.unshift({ id: uid(), text: text, done: false });
+      render();
+    }
+
+    function toggleTask(id) {
+      const task = tasks.find(function (t) { return t.id === id; });
+      if (task) {
+        task.done = !task.done;
+        render();
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function (t) { return t.id !== id; });
+      render();
+    }
+
+    function clearCompleted() {
+      tasks = tasks.filter(function (t) { return !t.done; });
+      render();
+    }
+
+    function visibleTasks() {
+      if (currentFilter === 'active') return tasks.filter(function (t) { return !t.done; });
+      if (currentFilter === 'completed') return tasks.filter(function (t) { return t.done; });
+      return tasks;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function render() {
+      const items = visibleTasks();
+      list.innerHTML = '';
+
+      items.forEach(function (task) {
+        const li = document.createElement('li');
+        li.className = 'task' + (task.done ? ' is-done' : '');
+        li.dataset.id = task.id;
+
+        li.innerHTML =
+          '<button class="task__check" aria-label="Toggle task complete" aria-pressed="' + task.done + '">' +
+            '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+          '<span class="task__label">' + escapeHtml(task.text) + '</span>' +
+          '<button class="task__delete" aria-label="Delete task">' +
+            '<svg viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' +
+          '</button>';
+
+        list.appendChild(li);
+      });
+
+      const totalVisible = tasks.length;
+      emptyState.classList.toggle('is-visible', totalVisible === 0);
+      if (totalVisible > 0 && items.length === 0) {
+        emptyState.classList.add('is-visible');
+        emptyState.textContent = 'Nothing in this view.';
+      } else if (totalVisible === 0) {
+        emptyState.textContent = 'Nothing here yet — the day is still a blank stem.';
+      }
+
+      const remaining = tasks.filter(function (t) { return !t.done; }).length;
+      countEl.textContent = remaining + (remaining === 1 ? ' left' : ' left');
+
+      clearBtn.style.visibility = tasks.some(function (t) { return t.done; }) ? 'visible' : 'hidden';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!value) return;
+      addTask(value);
+      input.value = '';
+      input.focus();
+    });
+
+    list.addEventListener('click', function (e) {
+      const checkBtn = e.target.closest('.task__check');
+      const deleteBtn = e.target.closest('.task__delete');
+      const li = e.target.closest('.task');
+      if (!li) return;
+      const id = li.dataset.id;
+
+      if (checkBtn) toggleTask(id);
+      if (deleteBtn) deleteTask(id);
+    });
+
+    clearBtn.addEventListener('click', clearCompleted);
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    render();
+  })();
+  </script>
 </body>
 </html>
