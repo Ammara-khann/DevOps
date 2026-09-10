@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bloom — a small, calm to-do list for one thing at a time.">
+<meta name="theme-color" content="#2F8FD1">
 <title>Bloom — a small list for today</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,14 +13,6 @@
   <main class="card">
     <header class="card__header">
       <p class="eyebrow">today's list</p>
-      <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="30" height="30">
-          <path d="M16 29 V14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-          <path d="M16 14 C 10 14, 9 8, 13 5 C 13 10, 15 12, 16 14 Z" fill="currentColor"/>
-          <path d="M16 14 C 22 14, 23 8, 19 5 C 19 10, 17 12, 16 14 Z" fill="currentColor" opacity="0.72"/>
-          <circle cx="16" cy="13.5" r="1.6" fill="currentColor"/>
-        </svg>
-      </div>
       <h1>Bloom</h1>
       <p class="tagline">Small things, tended one at a time.</p>
     </header>
@@ -30,7 +21,7 @@
       <input
         type="text"
         id="task-input"
-        placeholder="What needs doing?"
+        placeholder="What needs doing today?"
         maxlength="120"
         aria-label="Add a task"
       >
@@ -44,7 +35,7 @@
     <ul id="task-list" class="task-list"></ul>
 
     <p id="empty-state" class="empty-state">
-      Nothing here yet — the day is still a blank stem.
+      Nothing here yet — the day is still a blank stem. 🌱
     </p>
 
     <footer class="card__footer">
@@ -58,8 +49,140 @@
     </footer>
   </main>
 
-  <p class="credit">made with a little pink</p>
+  <p class="credit" style="display:flex; align-items:center; gap:5px;">
+    made with a little
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--rose)" aria-hidden="true">
+      <path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 3.5 0 6 3.5 4 7.5C19 16.65 12 21 12 21Z"/>
+    </svg>
+    blue
+  </p>
 
-  <script src="script.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // NOTE: localStorage isn't available in this environment, so tasks
+    // are kept in memory for the session instead.
+    let tasks = [];
+
+    const form = document.getElementById('add-form');
+    const input = document.getElementById('task-input');
+    const list = document.getElementById('task-list');
+    const emptyState = document.getElementById('empty-state');
+    const countEl = document.getElementById('count');
+    const clearBtn = document.getElementById('clear-completed');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    let currentFilter = 'all';
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function addTask(text) {
+      tasks.unshift({ id: uid(), text: text, done: false });
+      render();
+    }
+
+    function toggleTask(id) {
+      const task = tasks.find(function (t) { return t.id === id; });
+      if (task) {
+        task.done = !task.done;
+        render();
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function (t) { return t.id !== id; });
+      render();
+    }
+
+    function clearCompleted() {
+      tasks = tasks.filter(function (t) { return !t.done; });
+      render();
+    }
+
+    function visibleTasks() {
+      if (currentFilter === 'active') return tasks.filter(function (t) { return !t.done; });
+      if (currentFilter === 'completed') return tasks.filter(function (t) { return t.done; });
+      return tasks;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function render() {
+      const items = visibleTasks();
+      list.innerHTML = '';
+
+      items.forEach(function (task) {
+        const li = document.createElement('li');
+        li.className = 'task' + (task.done ? ' is-done' : '');
+        li.dataset.id = task.id;
+
+        li.innerHTML =
+          '<button class="task__check" aria-label="Toggle task complete" aria-pressed="' + task.done + '">' +
+            '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+          '<span class="task__label">' + escapeHtml(task.text) + '</span>' +
+          '<button class="task__delete" aria-label="Delete task">' +
+            '<svg viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' +
+          '</button>';
+
+        list.appendChild(li);
+      });
+
+      const totalVisible = tasks.length;
+      emptyState.classList.toggle('is-visible', totalVisible === 0);
+      if (totalVisible > 0 && items.length === 0) {
+        emptyState.classList.add('is-visible');
+        emptyState.textContent = 'Nothing in this view.';
+      } else if (totalVisible === 0) {
+        emptyState.textContent = 'Nothing here yet — the day is still a blank stem.';
+      }
+
+      const remaining = tasks.filter(function (t) { return !t.done; }).length;
+      countEl.textContent = remaining + (remaining === 1 ? ' left' : ' left');
+
+      clearBtn.style.visibility = tasks.some(function (t) { return t.done; }) ? 'visible' : 'hidden';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!value) return;
+      addTask(value);
+      input.value = '';
+      input.focus();
+    });
+
+    list.addEventListener('click', function (e) {
+      const checkBtn = e.target.closest('.task__check');
+      const deleteBtn = e.target.closest('.task__delete');
+      const li = e.target.closest('.task');
+      if (!li) return;
+      const id = li.dataset.id;
+
+      if (checkBtn) toggleTask(id);
+      if (deleteBtn) deleteTask(id);
+    });
+
+    clearBtn.addEventListener('click', clearCompleted);
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    render();
+  })();
+  </script>
 </body>
 </html>
