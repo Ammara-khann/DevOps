@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — a small list for today</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="card">
+    <header class="card__header">
+      <p class="eyebrow">today's list</p>
+      <h1>Bloom</h1>
+      <p class="tagline">Small things, tended one at a time.</p>
+    </header>
+
+    <form id="add-form" class="add-form" autocomplete="off">
+      <input
+        type="text"
+        id="task-input"
+        placeholder="What needs doing?"
+        maxlength="120"
+        aria-label="Add a task"
+      >
+      <button type="submit" aria-label="Add task">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+
+    <ul id="task-list" class="task-list"></ul>
+
+    <p id="empty-state" class="empty-state">
+      Nothing here yet — the day is still a blank stem.
+    </p>
+
+    <footer class="card__footer">
+      <span id="count" class="count">0 left</span>
+      <div class="filters" role="group" aria-label="Filter tasks">
+        <button class="filter-btn is-active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="active">Active</button>
+        <button class="filter-btn" data-filter="completed">Done</button>
+      </div>
+      <button id="clear-completed" class="text-btn">Clear done</button>
+    </footer>
+  </main>
+
+  <p class="credit">made with a little pink</p>
+
+  <script src="script.js"></script>
+</body>
+</html>
