@@ -1,24 +1,22 @@
 (function () {
-  'use strict';
+  const STORAGE_KEY = "bloom.tasks";
 
-  const STORAGE_KEY = 'bloom-tasks';
-
-  const form = document.getElementById('add-form');
-  const input = document.getElementById('task-input');
-  const list = document.getElementById('task-list');
-  const emptyState = document.getElementById('empty-state');
-  const countEl = document.getElementById('count');
-  const clearBtn = document.getElementById('clear-completed');
-  const filterBtns = document.querySelectorAll('.filter-btn');
+  const form = document.getElementById("add-form");
+  const input = document.getElementById("task-input");
+  const list = document.getElementById("task-list");
+  const countEl = document.getElementById("count");
+  const clearBtn = document.getElementById("clear-completed");
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  const card = document.querySelector(".card");
 
   let tasks = loadTasks();
-  let currentFilter = 'all';
+  let filter = "all";
 
   function loadTasks() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
-    } catch (err) {
+    } catch (e) {
       return [];
     }
   }
@@ -26,103 +24,92 @@
   function saveTasks() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (err) {
-      /* storage unavailable — app still works in-memory for this session */
+    } catch (e) {
+      /* storage unavailable, continue without persistence */
     }
   }
 
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  }
-
   function addTask(text) {
-    tasks.unshift({ id: uid(), text: text, done: false });
+    tasks.unshift({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      text,
+      done: false,
+    });
     saveTasks();
     render();
   }
 
   function toggleTask(id) {
-    const task = tasks.find(function (t) { return t.id === id; });
-    if (task) {
-      task.done = !task.done;
-      saveTasks();
-      render();
-    }
+    const task = tasks.find((t) => t.id === id);
+    if (task) task.done = !task.done;
+    saveTasks();
+    render();
   }
 
   function deleteTask(id) {
-    tasks = tasks.filter(function (t) { return t.id !== id; });
+    tasks = tasks.filter((t) => t.id !== id);
     saveTasks();
     render();
   }
 
   function clearCompleted() {
-    tasks = tasks.filter(function (t) { return !t.done; });
+    tasks = tasks.filter((t) => !t.done);
     saveTasks();
     render();
   }
 
   function visibleTasks() {
-    if (currentFilter === 'active') return tasks.filter(function (t) { return !t.done; });
-    if (currentFilter === 'completed') return tasks.filter(function (t) { return t.done; });
+    if (filter === "active") return tasks.filter((t) => !t.done);
+    if (filter === "completed") return tasks.filter((t) => t.done);
     return tasks;
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
   function render() {
+    list.innerHTML = "";
     const items = visibleTasks();
-    list.innerHTML = '';
 
-    items.forEach(function (task) {
-      const li = document.createElement('li');
-      li.className = 'task' + (task.done ? ' is-done' : '');
+    items.forEach((task) => {
+      const li = document.createElement("li");
+      li.className = "task-item" + (task.done ? " is-done" : "");
       li.dataset.id = task.id;
 
-      li.innerHTML =
-        '<button class="task__check" aria-label="Toggle task complete" aria-pressed="' + task.done + '">' +
-          '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        '</button>' +
-        '<span class="task__label">' + escapeHtml(task.text) + '</span>' +
-        '<button class="task__delete" aria-label="Delete task">' +
-          '<svg viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' +
-        '</button>';
+      li.innerHTML = `
+        <button class="task-check" aria-label="${task.done ? "Mark as not done" : "Mark as done"}">
+          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+            <path d="M4 12l5 5L20 6" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </button>
+        <span class="task-text"></span>
+        <button class="task-delete" aria-label="Delete task">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      `;
 
+      li.querySelector(".task-text").textContent = task.text;
       list.appendChild(li);
     });
 
-    const totalVisible = tasks.length;
-    emptyState.classList.toggle('is-visible', totalVisible === 0);
-    if (totalVisible > 0 && items.length === 0) {
-      emptyState.classList.add('is-visible');
-      emptyState.textContent = 'Nothing in this view.';
-    } else if (totalVisible === 0) {
-      emptyState.textContent = 'Nothing here yet — the day is still a blank stem.';
-    }
+    card.classList.toggle("is-empty", tasks.length === 0);
 
-    const remaining = tasks.filter(function (t) { return !t.done; }).length;
-    countEl.textContent = remaining + (remaining === 1 ? ' left' : ' left');
-
-    clearBtn.style.visibility = tasks.some(function (t) { return t.done; }) ? 'visible' : 'hidden';
+    const leftCount = tasks.filter((t) => !t.done).length;
+    countEl.textContent = `${leftCount} left`;
   }
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const value = input.value.trim();
-    if (!value) return;
-    addTask(value);
-    input.value = '';
+    const text = input.value.trim();
+    if (!text) return;
+    addTask(text);
+    input.value = "";
     input.focus();
   });
 
-  list.addEventListener('click', function (e) {
-    const checkBtn = e.target.closest('.task__check');
-    const deleteBtn = e.target.closest('.task__delete');
-    const li = e.target.closest('.task');
+  list.addEventListener("click", (e) => {
+    const checkBtn = e.target.closest(".task-check");
+    const deleteBtn = e.target.closest(".task-delete");
+    const li = e.target.closest(".task-item");
     if (!li) return;
     const id = li.dataset.id;
 
@@ -130,13 +117,13 @@
     if (deleteBtn) deleteTask(id);
   });
 
-  clearBtn.addEventListener('click', clearCompleted);
+  clearBtn.addEventListener("click", clearCompleted);
 
-  filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
-      btn.classList.add('is-active');
-      currentFilter = btn.dataset.filter;
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      filter = btn.dataset.filter;
       render();
     });
   });
