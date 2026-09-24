@@ -9,16 +9,19 @@ Group Members
 
 #Docker setup
 
-### 1. Build Docker Image 
+## 1. Build Docker Image 
 The Docker Image was built using the Dockerfile:
+
+## 2. Create docker image
 docker images
 
-#Build Container and Run Container
-RUN rm -rf /usr/share/nginx/html/
+## 3. Run Container
 docker run -d -p 8080:80 --name todo-container todo-app
 
-#Running container
+## 4. check Running container
 docker ps
+
+## 5. Run Application
 ![alt text](dockerps.png)
 
 ![alt text](localhost.png)
