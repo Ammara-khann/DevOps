@@ -1,14 +1,13 @@
-Bloom to-do App
+### Bloom to-do App
 
-Group Members
+### Group Members
 1.Ammara Khan (Project Manager)
 2.Eshal Siraj (Project Tester)
 3.Kashaf Ahmad (Developer)
 4.Laiba Saeed (UI/UX Designer)
 5.Fatima Zahra (Document Manager)
 
-#Docker setup
-
+### DOCKER SETUP
 ## 1. Build Docker Image 
 The Docker Image was built using the Dockerfile:
 
