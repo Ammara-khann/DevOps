@@ -1,5 +1,5 @@
 (function () {
-  const STORAGE_KEY = "bloom.tasks";
+  const API = "/api/tasks";
 
   const form = document.getElementById("add-form");
   const input = document.getElementById("task-input");
@@ -9,53 +9,41 @@
   const filterBtns = document.querySelectorAll(".filter-btn");
   const card = document.querySelector(".card");
 
-  let tasks = loadTasks();
+  let tasks = [];
   let filter = "all";
 
-  function loadTasks() {
+  async function loadTasks() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const res = await fetch(API);
+      tasks = await res.json();
+      render();
     } catch (e) {
-      return [];
+      console.error(e);
     }
   }
 
-  function saveTasks() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (e) {
-      /* storage unavailable, continue without persistence */
-    }
-  }
-
-  function addTask(text) {
-    tasks.unshift({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      text,
-      done: false,
+  async function addTask(text) {
+    await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
     });
-    saveTasks();
-    render();
+    loadTasks();
   }
 
-  function toggleTask(id) {
-    const task = tasks.find((t) => t.id === id);
-    if (task) task.done = !task.done;
-    saveTasks();
-    render();
+  async function toggleTask(id) {
+    await fetch(`${API}/${id}`, { method: "PATCH" });
+    loadTasks();
   }
 
-  function deleteTask(id) {
-    tasks = tasks.filter((t) => t.id !== id);
-    saveTasks();
-    render();
+  async function deleteTask(id) {
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    loadTasks();
   }
 
-  function clearCompleted() {
-    tasks = tasks.filter((t) => !t.done);
-    saveTasks();
-    render();
+  async function clearCompleted() {
+    await fetch(API, { method: "DELETE" });
+    loadTasks();
   }
 
   function visibleTasks() {
@@ -92,7 +80,6 @@
     });
 
     card.classList.toggle("is-empty", tasks.length === 0);
-
     const leftCount = tasks.filter((t) => !t.done).length;
     countEl.textContent = `${leftCount} left`;
   }
@@ -112,7 +99,6 @@
     const li = e.target.closest(".task-item");
     if (!li) return;
     const id = li.dataset.id;
-
     if (checkBtn) toggleTask(id);
     if (deleteBtn) deleteTask(id);
   });
@@ -128,5 +114,5 @@
     });
   });
 
-  render();
+  loadTasks();
 })();
