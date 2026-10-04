@@ -1,7 +1,7 @@
 services:
   backend:
     build: ./backend
-    image: ammarakhann/todo-app-backend:version2
+    image: maarak/todo-app-backend:version2
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -14,7 +14,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: ammarakhann/todo-app-frontend:version2
+    image: maarak/todo-app-frontend:version2
     ports:
       - "8080:80"
     depends_on:
