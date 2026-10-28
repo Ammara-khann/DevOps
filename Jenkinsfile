@@ -1,39 +1,35 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_USERNAME = 'YOUR_DOCKERHUB_USERNAME'
-    }
-
     stages {
 
-        stage('Pull Code from GitHub') {
+        stage('Stage 1: Pull Code from GitHub') {
             steps {
                 checkout scm
-                echo 'Code pulled successfully from GitHub'
+                echo 'Successfully pulled code from GitHub.'
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Stage 2: Build Docker Images') {
             steps {
-                echo 'Building Backend Docker Image'
-                bat 'docker build -t %DOCKERHUB_USERNAME%/devops-backend:latest -f backend/Dockerfile backend'
-
-                echo 'Building Frontend Docker Image'
-                bat 'docker build -t %DOCKERHUB_USERNAME%/devops-frontend:latest -f frontend/Dockerfile frontend'
+                bat 'docker build -t maarak/todo-app-backend:version2 ./backend'
+                bat 'docker build -t maarak/todo-app-frontend:version2 ./frontend'
             }
         }
 
-        stage('Push Images to Docker Hub') {
+        stage('Stage 3: Push Images to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_TOKEN'
-                )]) {
-                    bat 'echo %DH_TOKEN%| docker login -u %DH_USER% --password-stdin'
-                    bat 'docker push %DOCKERHUB_USERNAME%/devops-backend:latest'
-                    bat 'docker push %DOCKERHUB_USERNAME%/devops-frontend:latest'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    bat 'docker login -u %DOCKER_USER% --password-stdin'
+                    bat 'docker push maarak/todo-app-backend:version2'
+                    bat 'docker push maarak/todo-app-frontend:version2'
+                    bat 'docker logout'
                 }
             }
         }
@@ -41,11 +37,12 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'SUCCESS: All three pipeline stages completed.'
         }
 
         failure {
-            echo 'Pipeline failed. Please check the console output.'
+            echo 'FAILED: Check the Console Output for details.'
         }
     }
 }
+
