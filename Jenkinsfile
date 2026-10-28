@@ -25,30 +25,22 @@ pipeline {
             }
         }
 
-        stage('Stage 3: Push Images to Docker Hub') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    bat '''
-                        @echo off
-                        echo Logging in to Docker Hub...
-                        echo %DOCKER_PASS% | docker login --username %DOCKER_USER% --password-stdin
-                        if errorlevel 1 exit /b 1
-                    '''
-
-                    bat 'docker push maarak/todo-app-backend:version2'
-
-                    bat 'docker push maarak/todo-app-frontend:version2'
-
-                    bat 'docker logout'
-                }
-            }
+       stage('Stage 3: Push Images to Docker Hub') {
+          steps {
+               echo 'Pushing images to Docker Hub...'
+               withCredentials([usernamePassword(
+               credentialsId: 'dockerhub-credentials',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS')]) {
+            bat '''
+            echo Logging in to Docker Hub...
+            echo %DOCKER_PASS%| docker login -u %DOCKER_USER% --password-stdin
+            docker push maarak/todo-app-backend:version2
+            docker push maarak/todo-app-frontend:version2
+            '''
         }
+    }
+}
     }
 
     post {
