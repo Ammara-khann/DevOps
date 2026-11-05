@@ -4,7 +4,7 @@
   --ink: #3a2a30;
   --ink-soft: #8a747c;
   --pink: #c97b92;
-  --pink-deep: #a85b74;
+  --pink-deep: #b6335d;
   --pink-pale: #f6e8ec;
   --pink-line: #eeddE2;
   --line: #efe1e5;
@@ -65,7 +65,7 @@ body {
 h1 {
   margin: 0;
   font-family: "Fraunces", Georgia, serif;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 34px;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -73,7 +73,7 @@ h1 {
 
 .tagline {
   margin: 8px 0 0;
-  font-size: 14px;
+  font-size: 16px;
   font-style: italic;
   font-family: "Fraunces", Georgia, serif;
   color: var(--ink-soft);
@@ -340,7 +340,7 @@ h1 {
 
 .login-btn {
     background-color: white;
-    color: #2563eb;
+    color: #424d66;
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
