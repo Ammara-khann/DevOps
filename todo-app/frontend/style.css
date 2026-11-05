@@ -8,7 +8,7 @@
   --pink-pale: #f6e8ec;
   --pink-line: #eeddE2;
   --line: #efe1e5;
-  --done: #c8b9be;
+  --done: #f85d91;
   --radius: 18px;
 }
 
@@ -340,7 +340,7 @@ h1 {
 
 .login-btn {
     background-color: white;
-    color: #2563eb;
+    color: #3c5387;
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
