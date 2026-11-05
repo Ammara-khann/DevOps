@@ -68,3 +68,5 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
 
     # Note: EC2 deployment step has been removed as requested.
+
+    
