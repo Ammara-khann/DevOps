@@ -1,0 +1,72 @@
+name: CI/CD Pipeline - Bloom To-Do App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # ---------- BACKEND ----------
+    - name: Build Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/backend
+        load: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+
+    - name: Test Backend Container
+      run: |
+        docker run -d -p 3000:3000 --name test-backend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+        sleep 5
+        docker ps | grep test-backend
+        docker stop test-backend && docker rm test-backend
+
+    - name: Push Backend to Docker Hub
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/backend
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+
+    # ---------- FRONTEND ----------
+    - name: Build Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/frontend
+        load: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+
+    - name: Test Frontend Container
+      run: |
+        docker run -d -p 8080:80 --name test-frontend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+        sleep 5
+        docker ps | grep test-frontend
+        docker stop test-frontend && docker rm test-frontend
+
+    - name: Push Frontend to Docker Hub
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/frontend
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+
+    # Note: EC2 deployment step has been removed as requested.
+
+    

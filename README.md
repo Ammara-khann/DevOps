@@ -23,4 +23,6 @@ docker ps
 ## 5. Run Application
 ![alt text](dockerps.png)
 
-![alt text](localhost.png)
+Testing GitHub webhook with Jenkins - Build Automation.
+## 6. Created Workflow 
+Integrated CI/CD Action
