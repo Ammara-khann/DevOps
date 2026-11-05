@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * 0' # Har Sunday raat 12 baje (UTC) ko automatically chalega
 
 jobs:
   build-test-push:
@@ -66,7 +68,3 @@ jobs:
         context: ./todo-app/frontend
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
-
-    # Note: EC2 deployment step has been removed as requested.
-
-    
