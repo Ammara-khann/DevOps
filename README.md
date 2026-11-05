@@ -1,4 +1,4 @@
-### Bloom to-do App
+### Bloom to-do App (DevOps Project)
 
 ### Group Members
 1.Ammara Khan (Project Manager)
