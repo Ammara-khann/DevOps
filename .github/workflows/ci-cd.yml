@@ -1,1 +1,85 @@
 
+name: CI/CD Pipeline - Bloom To-Do App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-push-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # ---------- BACKEND ----------
+    - name: Build Backend Image (for test)
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/backend
+        load: true
+        tags: todo-app-backend:test
+
+    - name: Test Backend Container
+      run: |
+        docker run -d -p 3000:3000 --name test-backend todo-app-backend:test
+        sleep 5
+        docker ps | grep test-backend
+        docker stop test-backend && docker rm test-backend
+
+    - name: Push Backend to Docker Hub
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/backend
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+
+    # ---------- FRONTEND ----------
+    - name: Build Frontend Image (for test)
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/frontend
+        load: true
+        tags: todo-app-frontend:test
+
+    - name: Test Frontend Container
+      run: |
+        docker run -d -p 8080:80 --name test-frontend todo-app-frontend:test
+        sleep 5
+        docker ps | grep test-frontend
+        docker stop test-frontend && docker rm test-frontend
+
+    - name: Push Frontend to Docker Hub
+      uses: docker/build-push-action@v5
+      with:
+        context: ./todo-app/frontend
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+
+    # ---------- DEPLOY TO EC2 ----------
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+          docker stop todo-backend todo-frontend || true
+          docker rm todo-backend todo-frontend || true
+          docker run -d -p 3000:3000 --name todo-backend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+          docker run -d -p 8080:80 --name todo-frontend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
