@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: '0 0 * * 0' # Har Sunday raat 12 baje (UTC) ko automatically chalega
+    - cron: '0 0 * * 0'
 
 jobs:
   build-test-push:
@@ -31,11 +31,11 @@ jobs:
       with:
         context: ./todo-app/backend
         load: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:version4
 
     - name: Test Backend Container
       run: |
-        docker run -d -p 3000:3000 --name test-backend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+        docker run -d -p 3000:3000 --name test-backend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:version4
         sleep 5
         docker ps | grep test-backend
         docker stop test-backend && docker rm test-backend
@@ -45,7 +45,7 @@ jobs:
       with:
         context: ./todo-app/backend
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-backend:version4
 
     # ---------- FRONTEND ----------
     - name: Build Frontend Image
@@ -53,11 +53,11 @@ jobs:
       with:
         context: ./todo-app/frontend
         load: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:version4
 
     - name: Test Frontend Container
       run: |
-        docker run -d -p 8080:80 --name test-frontend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+        docker run -d -p 8080:80 --name test-frontend ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:version4
         sleep 5
         docker ps | grep test-frontend
         docker stop test-frontend && docker rm test-frontend
@@ -67,4 +67,4 @@ jobs:
       with:
         context: ./todo-app/frontend
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app-frontend:version4
